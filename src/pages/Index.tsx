@@ -150,79 +150,140 @@ const Index = () => {
     setIsEditDialogOpen(true);
   };
 
+  const exportContacts = () => {
+    const dataStr = JSON.stringify(contacts, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `contacts-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success('Контакты экспортированы!');
+  };
+
+  const importContacts = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target?.result as string) as Contact[];
+        if (Array.isArray(imported)) {
+          setContacts(imported);
+          toast.success(`Импортировано ${imported.length} контактов!`);
+        } else {
+          toast.error('Неверный формат файла');
+        }
+      } catch {
+        toast.error('Ошибка чтения файла');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <header className="mb-8 animate-slide-up">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent mb-2">
                 Мои Контакты
               </h1>
               <p className="text-muted-foreground">Управляй своими друзьями легко</p>
             </div>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="lg" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
-                  <Icon name="UserPlus" className="mr-2" size={20} />
-                  Добавить
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold">Новый контакт</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 mt-4">
-                  <div>
-                    <Label htmlFor="name">Имя *</Label>
-                    <Input
-                      id="name"
-                      placeholder="Иван Иванов"
-                      value={newContact.name}
-                      onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Телефон *</Label>
-                    <Input
-                      id="phone"
-                      placeholder="+7 999 123-45-67"
-                      value={newContact.phone}
-                      onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="email@example.com"
-                      value={newContact.email}
-                      onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="group">Группа</Label>
-                    <select
-                      id="group"
-                      value={newContact.group}
-                      onChange={(e) => setNewContact({ ...newContact, group: e.target.value })}
-                      className="w-full mt-1 px-3 py-2 border border-input rounded-md bg-background"
-                    >
-                      {groups.slice(1).map(group => (
-                        <option key={group} value={group}>{group}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <Button onClick={handleAddContact} className="w-full bg-gradient-to-r from-primary to-secondary">
-                    Сохранить контакт
+            <div className="flex gap-2 flex-wrap">
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={exportContacts}
+                className="border-2 hover:border-primary transition-colors"
+              >
+                <Icon name="Download" className="mr-2" size={20} />
+                Экспорт
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => document.getElementById('import-file')?.click()}
+                className="border-2 hover:border-secondary transition-colors"
+              >
+                <Icon name="Upload" className="mr-2" size={20} />
+                Импорт
+              </Button>
+              <input
+                id="import-file"
+                type="file"
+                accept=".json"
+                onChange={importContacts}
+                className="hidden"
+              />
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
+                    <Icon name="UserPlus" className="mr-2" size={20} />
+                    Добавить
                   </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-bold">Новый контакт</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    <div>
+                      <Label htmlFor="name">Имя *</Label>
+                      <Input
+                        id="name"
+                        placeholder="Иван Иванов"
+                        value={newContact.name}
+                        onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Телефон *</Label>
+                      <Input
+                        id="phone"
+                        placeholder="+7 999 123-45-67"
+                        value={newContact.phone}
+                        onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="email@example.com"
+                        value={newContact.email}
+                        onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="group">Группа</Label>
+                      <select
+                        id="group"
+                        value={newContact.group}
+                        onChange={(e) => setNewContact({ ...newContact, group: e.target.value })}
+                        className="w-full mt-1 px-3 py-2 border border-input rounded-md bg-background"
+                      >
+                        {groups.slice(1).map(group => (
+                          <option key={group} value={group}>{group}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <Button onClick={handleAddContact} className="w-full bg-gradient-to-r from-primary to-secondary">
+                      Сохранить контакт
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           <div className="relative">
