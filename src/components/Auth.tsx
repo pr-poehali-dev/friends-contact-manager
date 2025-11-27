@@ -217,6 +217,21 @@ const Auth = ({ onLogin }: AuthProps) => {
                       <Icon name={showRegisterPassword ? "EyeOff" : "Eye"} size={18} />
                     </button>
                   </div>
+                  {registerPassword.length > 0 && (
+                    <div className="mt-2">
+                      <div className="flex gap-1 mb-1">
+                        <div className={`h-1 flex-1 rounded-full transition-all ${registerPassword.length >= 1 ? (registerPassword.length < 6 ? 'bg-red-500' : registerPassword.length < 8 ? 'bg-yellow-500' : registerPassword.length < 12 ? 'bg-blue-500' : 'bg-green-500') : 'bg-gray-200'}`}></div>
+                        <div className={`h-1 flex-1 rounded-full transition-all ${registerPassword.length >= 8 ? (registerPassword.length < 12 ? 'bg-blue-500' : 'bg-green-500') : 'bg-gray-200'}`}></div>
+                        <div className={`h-1 flex-1 rounded-full transition-all ${registerPassword.length >= 12 ? 'bg-green-500' : 'bg-gray-200'}`}></div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {registerPassword.length < 6 && 'Слабый пароль'}
+                        {registerPassword.length >= 6 && registerPassword.length < 8 && 'Средний пароль'}
+                        {registerPassword.length >= 8 && registerPassword.length < 12 && 'Хороший пароль'}
+                        {registerPassword.length >= 12 && 'Отличный пароль!'}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="register-confirm">Подтвердите пароль</Label>
