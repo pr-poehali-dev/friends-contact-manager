@@ -37,60 +37,68 @@ const Auth = ({ onLogin }: AuthProps) => {
   };
 
   const handleLogin = () => {
-    if (!loginEmail || !loginPassword) {
+    const trimmedEmail = loginEmail.trim();
+    const trimmedPassword = loginPassword.trim();
+    
+    if (!trimmedEmail || !trimmedPassword) {
       toast.error('Заполните все поля');
       return;
     }
 
     const users = getUsers();
-    const user = users.find(u => u.email === loginEmail && u.password === loginPassword);
+    const user = users.find(u => u.email === trimmedEmail && u.password === trimmedPassword);
 
     if (user) {
       toast.success(`Добро пожаловать, ${user.name}!`);
-      onLogin(loginEmail);
+      onLogin(trimmedEmail);
     } else {
       toast.error('Неверный email или пароль');
     }
   };
 
   const handleRegister = () => {
-    if (!registerName || !registerEmail || !registerPassword || !registerConfirmPassword) {
+    const trimmedName = registerName.trim();
+    const trimmedEmail = registerEmail.trim();
+    const trimmedPassword = registerPassword.trim();
+    const trimmedConfirmPassword = registerConfirmPassword.trim();
+    
+    if (!trimmedName || !trimmedEmail || !trimmedPassword || !trimmedConfirmPassword) {
       toast.error('Заполните все поля');
       return;
     }
 
-    if (registerPassword !== registerConfirmPassword) {
+    if (trimmedPassword !== trimmedConfirmPassword) {
       toast.error('Пароли не совпадают');
       return;
     }
 
-    if (registerPassword.length < 6) {
+    if (trimmedPassword.length < 6) {
       toast.error('Пароль должен быть минимум 6 символов');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(registerEmail)) {
+    if (!emailRegex.test(trimmedEmail)) {
       toast.error('Введите корректный email');
       return;
     }
 
     const users = getUsers();
-    if (users.find(u => u.email === registerEmail)) {
+    if (users.find(u => u.email === trimmedEmail)) {
       toast.error('Пользователь с таким email уже существует');
       return;
     }
 
     const newUser: User = {
-      email: registerEmail,
-      password: registerPassword,
-      name: registerName
+      email: trimmedEmail,
+      password: trimmedPassword,
+      name: trimmedName
     };
 
     users.push(newUser);
     saveUsers(users);
     toast.success('Регистрация успешна!');
-    onLogin(registerEmail);
+    onLogin(trimmedEmail);
   };
 
   return (
