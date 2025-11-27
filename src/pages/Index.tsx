@@ -59,6 +59,8 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTab, setSelectedTab] = useState('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [newContact, setNewContact] = useState({
     name: '',
     phone: '',
@@ -109,6 +111,25 @@ const Index = () => {
   const deleteContact = (id: string) => {
     setContacts(contacts.filter(c => c.id !== id));
     toast.success('Контакт удален');
+  };
+
+  const handleEditContact = () => {
+    if (!editingContact || !editingContact.name || !editingContact.phone) {
+      toast.error('Заполните имя и телефон');
+      return;
+    }
+
+    setContacts(contacts.map(contact => 
+      contact.id === editingContact.id ? editingContact : contact
+    ));
+    setEditingContact(null);
+    setIsEditDialogOpen(false);
+    toast.success('Контакт обновлен!');
+  };
+
+  const openEditDialog = (contact: Contact) => {
+    setEditingContact({ ...contact });
+    setIsEditDialogOpen(true);
   };
 
   return (
@@ -285,6 +306,14 @@ const Index = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
+                          onClick={() => openEditDialog(contact)}
+                          className="hover:bg-secondary hover:text-white transition-colors"
+                        >
+                          <Icon name="Pencil" size={16} />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
                           onClick={() => deleteContact(contact.id)}
                           className="hover:bg-destructive hover:text-white transition-colors"
                         >
@@ -298,6 +327,65 @@ const Index = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">Редактировать контакт</DialogTitle>
+            </DialogHeader>
+            {editingContact && (
+              <div className="space-y-4 mt-4">
+                <div>
+                  <Label htmlFor="edit-name">Имя *</Label>
+                  <Input
+                    id="edit-name"
+                    placeholder="Иван Иванов"
+                    value={editingContact.name}
+                    onChange={(e) => setEditingContact({ ...editingContact, name: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-phone">Телефон *</Label>
+                  <Input
+                    id="edit-phone"
+                    placeholder="+7 999 123-45-67"
+                    value={editingContact.phone}
+                    onChange={(e) => setEditingContact({ ...editingContact, phone: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-email">Email</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    placeholder="email@example.com"
+                    value={editingContact.email}
+                    onChange={(e) => setEditingContact({ ...editingContact, email: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-group">Группа</Label>
+                  <select
+                    id="edit-group"
+                    value={editingContact.group}
+                    onChange={(e) => setEditingContact({ ...editingContact, group: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 border border-input rounded-md bg-background"
+                  >
+                    {groups.slice(1).map(group => (
+                      <option key={group} value={group}>{group}</option>
+                    ))}
+                  </select>
+                </div>
+                <Button onClick={handleEditContact} className="w-full bg-gradient-to-r from-primary to-secondary">
+                  Сохранить изменения
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
