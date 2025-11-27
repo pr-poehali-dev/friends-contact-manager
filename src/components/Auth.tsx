@@ -22,10 +22,13 @@ const USERS_KEY = 'contacts-app-users';
 const Auth = ({ onLogin }: AuthProps) => {
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [registerName, setRegisterName] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] = useState(false);
 
   const getUsers = (): User[] => {
     const stored = localStorage.getItem(USERS_KEY);
@@ -145,15 +148,24 @@ const Auth = ({ onLogin }: AuthProps) => {
                 </div>
                 <div>
                   <Label htmlFor="login-password">Пароль</Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                    className="mt-1"
-                  />
+                  <div className="relative mt-1">
+                    <Input
+                      id="login-password"
+                      type={showLoginPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Icon name={showLoginPassword ? "EyeOff" : "Eye"} size={18} />
+                    </button>
+                  </div>
                 </div>
                 <Button 
                   onClick={handleLogin} 
@@ -188,26 +200,44 @@ const Auth = ({ onLogin }: AuthProps) => {
                 </div>
                 <div>
                   <Label htmlFor="register-password">Пароль</Label>
-                  <Input
-                    id="register-password"
-                    type="password"
-                    placeholder="Минимум 6 символов"
-                    value={registerPassword}
-                    onChange={(e) => setRegisterPassword(e.target.value)}
-                    className="mt-1"
-                  />
+                  <div className="relative mt-1">
+                    <Input
+                      id="register-password"
+                      type={showRegisterPassword ? "text" : "password"}
+                      placeholder="Минимум 6 символов"
+                      value={registerPassword}
+                      onChange={(e) => setRegisterPassword(e.target.value)}
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Icon name={showRegisterPassword ? "EyeOff" : "Eye"} size={18} />
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="register-confirm">Подтвердите пароль</Label>
-                  <Input
-                    id="register-confirm"
-                    type="password"
-                    placeholder="Повторите пароль"
-                    value={registerConfirmPassword}
-                    onChange={(e) => setRegisterConfirmPassword(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
-                    className="mt-1"
-                  />
+                  <div className="relative mt-1">
+                    <Input
+                      id="register-confirm"
+                      type={showRegisterConfirmPassword ? "text" : "password"}
+                      placeholder="Повторите пароль"
+                      value={registerConfirmPassword}
+                      onChange={(e) => setRegisterConfirmPassword(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowRegisterConfirmPassword(!showRegisterConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Icon name={showRegisterConfirmPassword ? "EyeOff" : "Eye"} size={18} />
+                    </button>
+                  </div>
                 </div>
                 <Button 
                   onClick={handleRegister} 
