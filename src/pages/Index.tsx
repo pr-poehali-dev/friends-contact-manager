@@ -30,12 +30,16 @@ const getInitialContacts = (userEmail: string | null): Contact[] => {
   const stored = localStorage.getItem(USER_CONTACTS_PREFIX + userEmail);
   if (stored) {
     try {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
     } catch {
       return [];
     }
   }
-  return [
+  
+  const defaultContacts = [
     {
       id: '1',
       name: 'Анна Петрова',
@@ -69,6 +73,9 @@ const getInitialContacts = (userEmail: string | null): Contact[] => {
       group: 'Друзья'
     }
   ];
+  
+  localStorage.setItem(USER_CONTACTS_PREFIX + userEmail, JSON.stringify(defaultContacts));
+  return defaultContacts;
 };
 
 const Index = () => {
@@ -100,7 +107,8 @@ const Index = () => {
   const handleLogin = (email: string) => {
     localStorage.setItem(CURRENT_USER_KEY, email);
     setCurrentUser(email);
-    setContacts(getInitialContacts(email));
+    const userContacts = getInitialContacts(email);
+    setContacts(userContacts);
   };
 
   const handleLogout = () => {
