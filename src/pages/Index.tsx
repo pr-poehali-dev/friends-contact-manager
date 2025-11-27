@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import Auth from '@/components/Auth';
 
 interface Contact {
   id: string;
@@ -20,10 +21,13 @@ interface Contact {
   group: string;
 }
 
-const STORAGE_KEY = 'contacts-app-data';
+const CURRENT_USER_KEY = 'contacts-app-current-user';
+const USER_CONTACTS_PREFIX = 'contacts-app-user-';
 
-const getInitialContacts = (): Contact[] => {
-  const stored = localStorage.getItem(STORAGE_KEY);
+const getInitialContacts = (userEmail: string | null): Contact[] => {
+  if (!userEmail) return [];
+  
+  const stored = localStorage.getItem(USER_CONTACTS_PREFIX + userEmail);
   if (stored) {
     try {
       return JSON.parse(stored);
@@ -68,7 +72,10 @@ const getInitialContacts = (): Contact[] => {
 };
 
 const Index = () => {
-  const [contacts, setContacts] = useState<Contact[]>(getInitialContacts);
+  const [currentUser, setCurrentUser] = useState<string | null>(() => {
+    return localStorage.getItem(CURRENT_USER_KEY);
+  });
+  const [contacts, setContacts] = useState<Contact[]>(() => getInitialContacts(currentUser));
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTab, setSelectedTab] = useState('all');
@@ -85,8 +92,27 @@ const Index = () => {
   const groups = ['Все', 'Работа', 'Друзья', 'Семья', 'Учеба'];
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
-  }, [contacts]);
+    if (currentUser) {
+      localStorage.setItem(USER_CONTACTS_PREFIX + currentUser, JSON.stringify(contacts));
+    }
+  }, [contacts, currentUser]);
+
+  const handleLogin = (email: string) => {
+    localStorage.setItem(CURRENT_USER_KEY, email);
+    setCurrentUser(email);
+    setContacts(getInitialContacts(email));
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(CURRENT_USER_KEY);
+    setCurrentUser(null);
+    setContacts([]);
+    toast.success('Вы вышли из аккаунта');
+  };
+
+  if (!currentUser) {
+    return <Auth onLogin={handleLogin} />;
+  }
 
   const filteredContacts = contacts.filter((contact) => {
     const matchesSearch = contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -194,8 +220,21 @@ const Index = () => {
                 Мои Контакты
               </h1>
               <p className="text-muted-foreground">Управляй своими друзьями легко</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                <Icon name="User" size={14} className="inline mr-1" />
+                {currentUser}
+              </p>
             </div>
             <div className="flex gap-2 flex-wrap">
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={handleLogout}
+                className="border-2 hover:border-destructive transition-colors"
+              >
+                <Icon name="LogOut" className="mr-2" size={20} />
+                Выйти
+              </Button>
               <Button 
                 variant="outline" 
                 size="lg"
