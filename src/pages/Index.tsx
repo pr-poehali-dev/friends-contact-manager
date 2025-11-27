@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,8 +20,18 @@ interface Contact {
   group: string;
 }
 
-const Index = () => {
-  const [contacts, setContacts] = useState<Contact[]>([
+const STORAGE_KEY = 'contacts-app-data';
+
+const getInitialContacts = (): Contact[] => {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return [];
+    }
+  }
+  return [
     {
       id: '1',
       name: 'Анна Петрова',
@@ -54,7 +64,11 @@ const Index = () => {
       isFavorite: false,
       group: 'Друзья'
     }
-  ]);
+  ];
+};
+
+const Index = () => {
+  const [contacts, setContacts] = useState<Contact[]>(getInitialContacts);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTab, setSelectedTab] = useState('all');
@@ -69,6 +83,10 @@ const Index = () => {
   });
 
   const groups = ['Все', 'Работа', 'Друзья', 'Семья', 'Учеба'];
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
+  }, [contacts]);
 
   const filteredContacts = contacts.filter((contact) => {
     const matchesSearch = contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
